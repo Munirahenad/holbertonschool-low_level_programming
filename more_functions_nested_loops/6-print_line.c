@@ -1,15 +1,22 @@
 #include "main.h"
 
 /**
- *print_line- print line segun el paremtro pasado
- *
- *@n: parametro a evaluar
- *
- *Return: numero de lineas pasado
+ * print_line - draws a straight line in the terminal
+ * @n: number of times the character _ should be printed
  */
 void print_line(int n)
 {
-	for (; n > 0; n--)
-		_putchar('_');
-	_putchar('\n');
+int i;
+if (n <= 0)
+{
+_putchar('\n');
+}
+else
+{
+for (i = 0; i < n; i++)
+{
+_putchar('_');
+}
+_putchar('\n');
+}
 }
