@@ -2,12 +2,13 @@
 
 /**
  * set_string - sets the value of a pointer to a char
- * @s: pointer to the pointer to be changed
- * @to: string to point to
+ * @s: double pointer to the string pointer to modify
+ * @to: pointer to the string to set
  *
  * Return: void
  */
 void set_string(char **s, char *to)
 {
-    *s = to;
+	char **temp = s;
+	*temp = to;
 }
