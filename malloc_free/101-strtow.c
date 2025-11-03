@@ -1,10 +1,48 @@
 #include "main.h"
 #include <stdlib.h>
 
-/* Helpers prototypes (file-local) */
+/**
+* strtow - splits a string into words (space-separated)
+* @str: input string
+*
+* Return: pointer to array of words, or NULL on failure/empty
+*/
+char **strtow(char *str);
+
+/**
+* word_count - count words in a string separated by spaces
+* @str: input string
+*
+* Return: number of words found
+*/
 static int word_count(char *str);
+
+/**
+* word_len - compute the length of the next word starting at index start
+* @str: input string
+* @start: starting index of the word
+*
+* Return: length in characters of the word
+*/
 static int word_len(char *str, int start);
+
+/**
+* dup_word - allocate and copy a word substring
+* @str: source string
+* @start: starting index of the word in @str
+* @len: length of the word to copy
+*
+* Return: pointer to newly allocated null-terminated word, or NULL on failure
+*/
 static char *dup_word(char *str, int start, int len);
+
+/**
+* free_words - free an array of words up to a given index
+* @words: array of strings to free
+* @upto: number of valid entries to free (from 0 to upto - 1)
+*
+* Return: Nothing.
+*/
 static void free_words(char **words, int upto);
 
 /**
@@ -46,8 +84,6 @@ char **strtow(char *str)
 	words[k] = NULL;
 	return (words);
 }
-
-/* ===== helpers ===== */
 
 static int word_count(char *str)
 {
