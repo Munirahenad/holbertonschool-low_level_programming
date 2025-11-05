@@ -3,10 +3,10 @@
 #include <unistd.h>
 
 /**
- * _strlen - compute length of string
- * @s: input string
+ * _strlen - Returns the length of a string
+ * @s: The string to measure
  *
- * Return: length as int
+ * Return: The length of the string
  */
 int _strlen(char *s)
 {
@@ -18,10 +18,10 @@ int _strlen(char *s)
 }
 
 /**
- * is_digit - check that a string is composed only of digits 0..9
- * @s: input string
+ * is_digit - Checks if a string contains only digits
+ * @s: The string to check
  *
- * Return: 1 if only digits, 0 otherwise
+ * Return: 1 if all are digits, 0 otherwise
  */
 int is_digit(char *s)
 {
@@ -40,36 +40,31 @@ int is_digit(char *s)
 }
 
 /**
- * print_error - print "Error" and exit with status 98
- *
- * Return: never returns
+ * print_error - Prints "Error" and exits with status 98
  */
 void print_error(void)
 {
-	/* write to stderr per project convention */
-	write(2, "Error\n", 6);
+	write(1, "Error\n", 6); /* stdout instead of stderr */
 	exit(98);
 }
 
 /**
- * multiply_strings - multiply two positive integer strings and print result
- * @num1: first positive integer as string
- * @num2: second positive integer as string
+ * multiply_strings - Multiplies two positive number strings and prints result
+ * @num1: The first number as string
+ * @num2: The second number as string
  *
- * Description: classic grade-school multiplication stored into an int buffer.
- * Prints the result with no leading zeros (unless result is zero), then '\n'.
- * Exits with 98 on allocation failure.
+ * Description: Implements manual multiplication algorithm
  */
 void multiply_strings(char *num1, char *num2)
 {
 	int len1 = _strlen(num1);
 	int len2 = _strlen(num2);
-	int out_len = len1 + len2;
-	int *out;
+	int len = len1 + len2;
+	int *result;
 	int i, j, carry, start = 0;
 
-	out = calloc(out_len, sizeof(int));
-	if (!out)
+	result = calloc(len, sizeof(int));
+	if (!result)
 		exit(98);
 
 	for (i = len1 - 1; i >= 0; i--)
@@ -80,35 +75,34 @@ void multiply_strings(char *num1, char *num2)
 		for (j = len2 - 1; j >= 0; j--)
 		{
 			int d2 = num2[j] - '0';
-			int idx = i + j + 1;
-			int sum = d1 * d2 + out[idx] + carry;
+			int sum = d1 * d2 + result[i + j + 1] + carry;
 
-			out[idx] = sum % 10;
+			result[i + j + 1] = sum % 10;
 			carry = sum / 10;
 		}
-		out[i] += carry;
+		result[i] += carry;
 	}
 
-	while (start < out_len && out[start] == 0)
+	while (start < len && result[start] == 0)
 		start++;
 
-	if (start == out_len)
+	if (start == len)
 		_putchar('0');
 	else
 	{
-		for (; start < out_len; start++)
-			_putchar(out[start] + '0');
+		for (; start < len; start++)
+			_putchar(result[start] + '0');
 	}
 	_putchar('\n');
-	free(out);
+	free(result);
 }
 
 /**
- * main - entry point: validate args then multiply
- * @argc: args count
- * @argv: args vector
+ * main - Entry point for the program
+ * @argc: Argument count
+ * @argv: Argument vector
  *
- * Return: 0 on success, 98 on error (via print_error)
+ * Return: Always 0
  */
 int main(int argc, char *argv[])
 {
