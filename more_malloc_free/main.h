@@ -3,8 +3,9 @@
 
 int _putchar(char c);
 int is_digit(char *s);
-void multiply_strings(char *num1, char *num2);
+int _strlen(char *s);
 void print_error(void);
+void multiply_strings(char *num1, char *num2);
 
-#endif
+#endif /* MAIN_H */
 
