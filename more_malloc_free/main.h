@@ -8,4 +8,3 @@ void print_error(void);
 void multiply_strings(char *num1, char *num2);
 
 #endif /* MAIN_H */
-
