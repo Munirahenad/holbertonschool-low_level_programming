@@ -116,4 +116,3 @@ int main(int argc, char *argv[])
     multiply_strings(argv[1], argv[2]);
     return (0);
 }
-
