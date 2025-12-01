@@ -4,12 +4,20 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+/**
+ * print_error - prints error message and exits
+ * @msg: error message to print
+ */
 void print_error(char *msg)
 {
     fprintf(stderr, "%s\n", msg);
     exit(98);
 }
 
+/**
+ * print_magic - prints ELF magic bytes
+ * @e_ident: ELF identification array
+ */
 void print_magic(unsigned char *e_ident)
 {
     int i;
@@ -25,6 +33,10 @@ void print_magic(unsigned char *e_ident)
     }
 }
 
+/**
+ * print_class - prints ELF class
+ * @e_ident: ELF identification array
+ */
 void print_class(unsigned char *e_ident)
 {
     printf("  Class:                             ");
@@ -45,6 +57,10 @@ void print_class(unsigned char *e_ident)
     }
 }
 
+/**
+ * print_data - prints data encoding
+ * @e_ident: ELF identification array
+ */
 void print_data(unsigned char *e_ident)
 {
     printf("  Data:                              ");
@@ -65,16 +81,19 @@ void print_data(unsigned char *e_ident)
     }
 }
 
+/**
+ * print_version - prints ELF version
+ * @e_ident: ELF identification array
+ */
 void print_version(unsigned char *e_ident)
 {
-    printf("  Version:                           ");
-    
-    if (e_ident[EI_VERSION] == EV_NONE)
-        printf("0\n");
-    else
-        printf("%d\n", e_ident[EI_VERSION]);
+    printf("  Version:                           %d\n", e_ident[EI_VERSION]);
 }
 
+/**
+ * print_osabi - prints OS/ABI
+ * @e_ident: ELF identification array
+ */
 void print_osabi(unsigned char *e_ident)
 {
     printf("  OS/ABI:                            ");
@@ -116,15 +135,25 @@ void print_osabi(unsigned char *e_ident)
     }
 }
 
+/**
+ * print_abiversion - prints ABI version
+ * @e_ident: ELF identification array
+ */
 void print_abiversion(unsigned char *e_ident)
 {
     printf("  ABI Version:                       %d\n", e_ident[EI_ABIVERSION]);
 }
 
+/**
+ * print_type - prints ELF type
+ * @e_type: ELF type
+ * @e_ident: ELF identification array
+ */
 void print_type(uint16_t e_type, unsigned char *e_ident)
 {
     printf("  Type:                              ");
     
+    /* Handle endianness for e_type */
     if (e_ident[EI_DATA] == ELFDATA2MSB)
     {
         e_type = ((e_type >> 8) & 0x00FF) | ((e_type << 8) & 0xFF00);
@@ -153,10 +182,16 @@ void print_type(uint16_t e_type, unsigned char *e_ident)
     }
 }
 
+/**
+ * print_entry - prints entry point address
+ * @e_entry: entry point address
+ * @e_ident: ELF identification array
+ */
 void print_entry(unsigned long int e_entry, unsigned char *e_ident)
 {
     printf("  Entry point address:               ");
 
+    /* Handle big endian addresses */
     if (e_ident[EI_DATA] == ELFDATA2MSB)
     {
         e_entry = ((e_entry << 8) & 0xFF00FF00) |
@@ -164,12 +199,19 @@ void print_entry(unsigned long int e_entry, unsigned char *e_ident)
         e_entry = (e_entry << 16) | (e_entry >> 16);
     }
 
+    /* Print based on class */
     if (e_ident[EI_CLASS] == ELFCLASS32)
         printf("0x%x\n", (unsigned int)e_entry);
     else
         printf("0x%lx\n", e_entry);
 }
 
+/**
+ * main - main function
+ * @argc: argument count
+ * @argv: argument array
+ * Return: 0 on success, 98 on error
+ */
 int main(int argc, char **argv)
 {
     int fd;
@@ -185,16 +227,19 @@ int main(int argc, char **argv)
     if (fd == -1)
         print_error("Error: Cannot open file");
 
+    /* Read ELF identification */
     read_bytes = read(fd, e_ident, EI_NIDENT);
     if (read_bytes != EI_NIDENT)
         print_error("Error: Cannot read ELF identification");
 
+    /* Check ELF magic */
     if (e_ident[EI_MAG0] != ELFMAG0 ||
         e_ident[EI_MAG1] != ELFMAG1 ||
         e_ident[EI_MAG2] != ELFMAG2 ||
         e_ident[EI_MAG3] != ELFMAG3)
         print_error("Error: Not an ELF file");
 
+    /* Return to beginning and read full header based on class */
     lseek(fd, 0, SEEK_SET);
     
     if (e_ident[EI_CLASS] == ELFCLASS32)
@@ -224,6 +269,7 @@ int main(int argc, char **argv)
         print_error("Error: Unknown ELF class");
     }
 
+    /* Print ELF header information */
     printf("ELF Header:\n");
     print_magic(e_ident);
     print_class(e_ident);
