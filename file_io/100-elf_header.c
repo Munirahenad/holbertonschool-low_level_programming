@@ -4,20 +4,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-/**
- * print_error - prints error message and exits with code 98
- * @msg: error message
- */
 void print_error(char *msg)
 {
     fprintf(stderr, "%s\n", msg);
     exit(98);
 }
 
-/**
- * print_magic - prints ELF magic bytes
- * @e_ident: ELF identification array
- */
 void print_magic(unsigned char *e_ident)
 {
     int i;
@@ -33,10 +25,6 @@ void print_magic(unsigned char *e_ident)
     }
 }
 
-/**
- * print_class - prints ELF class
- * @e_ident: ELF identification array
- */
 void print_class(unsigned char *e_ident)
 {
     printf("  Class:                             ");
@@ -57,10 +45,6 @@ void print_class(unsigned char *e_ident)
     }
 }
 
-/**
- * print_data - prints data encoding
- * @e_ident: ELF identification array
- */
 void print_data(unsigned char *e_ident)
 {
     printf("  Data:                              ");
@@ -81,10 +65,6 @@ void print_data(unsigned char *e_ident)
     }
 }
 
-/**
- * print_version - prints ELF version
- * @e_ident: ELF identification array
- */
 void print_version(unsigned char *e_ident)
 {
     printf("  Version:                           ");
@@ -102,10 +82,6 @@ void print_version(unsigned char *e_ident)
     }
 }
 
-/**
- * print_osabi - prints OS/ABI
- * @e_ident: ELF identification array
- */
 void print_osabi(unsigned char *e_ident)
 {
     printf("  OS/ABI:                            ");
@@ -147,21 +123,12 @@ void print_osabi(unsigned char *e_ident)
     }
 }
 
-/**
- * print_abiversion - prints ABI version
- * @e_ident: ELF identification array
- */
 void print_abiversion(unsigned char *e_ident)
 {
     printf("  ABI Version:                       %d\n", e_ident[EI_ABIVERSION]);
 }
 
-/**
- * print_type - prints ELF type
- * @e_type: ELF type
- * @e_ident: ELF identification array
- */
-void print_type(uint16_t e_type, unsigned char *e_ident)
+void print_type(uint16_t e_type)
 {
     printf("  Type:                              ");
     switch (e_type)
@@ -187,11 +154,6 @@ void print_type(uint16_t e_type, unsigned char *e_ident)
     }
 }
 
-/**
- * print_entry - prints entry point address
- * @e_entry: entry point address
- * @e_ident: ELF identification array
- */
 void print_entry(unsigned long int e_entry, unsigned char *e_ident)
 {
     printf("  Entry point address:               ");
@@ -209,12 +171,6 @@ void print_entry(unsigned long int e_entry, unsigned char *e_ident)
         printf("0x%lx\n", e_entry);
 }
 
-/**
- * main - main function
- * @argc: argument count
- * @argv: argument array
- * Return: 0 on success, 98 on error
- */
 int main(int argc, char **argv)
 {
     int fd;
@@ -247,7 +203,7 @@ int main(int argc, char **argv)
     print_version(e_ident);
     print_osabi(e_ident);
     print_abiversion(e_ident);
-    print_type(header.e_type, e_ident);
+    print_type(header.e_type);
     print_entry(header.e_entry, e_ident);
 
     if (close(fd) == -1)
