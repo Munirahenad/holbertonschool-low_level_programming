@@ -175,8 +175,9 @@ int main(int argc, char **argv)
 {
     int fd;
     ssize_t read_bytes;
-    Elf64_Ehdr header;
-    unsigned char *e_ident;
+    unsigned char e_ident[EI_NIDENT];
+    uint16_t e_type;
+    unsigned long int e_entry;
 
     if (argc != 2)
         print_error("Usage: elf_header elf_filename");
@@ -185,16 +186,47 @@ int main(int argc, char **argv)
     if (fd == -1)
         print_error("Error: Cannot open file");
 
-    read_bytes = read(fd, &header, sizeof(header));
-    if (read_bytes != sizeof(header))
-        print_error("Error: Cannot read ELF header");
+    /* قراءة Magic bytes أولاً لتحديد Class */
+    read_bytes = read(fd, e_ident, EI_NIDENT);
+    if (read_bytes != EI_NIDENT)
+        print_error("Error: Cannot read ELF identification");
 
-    e_ident = header.e_ident;
     if (e_ident[EI_MAG0] != ELFMAG0 ||
         e_ident[EI_MAG1] != ELFMAG1 ||
         e_ident[EI_MAG2] != ELFMAG2 ||
         e_ident[EI_MAG3] != ELFMAG3)
         print_error("Error: Not an ELF file");
+
+    /* الرجوع لبداية الملف */
+    lseek(fd, 0, SEEK_SET);
+
+    /* قراءة الرأس بناءً على Class */
+    if (e_ident[EI_CLASS] == ELFCLASS32)
+    {
+        Elf32_Ehdr header32;
+        
+        read_bytes = read(fd, &header32, sizeof(header32));
+        if (read_bytes != sizeof(header32))
+            print_error("Error: Cannot read ELF header");
+        
+        e_type = header32.e_type;
+        e_entry = header32.e_entry;
+    }
+    else if (e_ident[EI_CLASS] == ELFCLASS64)
+    {
+        Elf64_Ehdr header64;
+        
+        read_bytes = read(fd, &header64, sizeof(header64));
+        if (read_bytes != sizeof(header64))
+            print_error("Error: Cannot read ELF header");
+        
+        e_type = header64.e_type;
+        e_entry = header64.e_entry;
+    }
+    else
+    {
+        print_error("Error: Unknown ELF class");
+    }
 
     printf("ELF Header:\n");
     print_magic(e_ident);
@@ -203,8 +235,8 @@ int main(int argc, char **argv)
     print_version(e_ident);
     print_osabi(e_ident);
     print_abiversion(e_ident);
-    print_type(header.e_type);
-    print_entry(header.e_entry, e_ident);
+    print_type(e_type);
+    print_entry(e_entry, e_ident);
 
     if (close(fd) == -1)
         print_error("Error: Cannot close file descriptor");
