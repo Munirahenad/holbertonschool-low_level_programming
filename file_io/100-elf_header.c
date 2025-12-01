@@ -67,19 +67,7 @@ void print_data(unsigned char *e_ident)
 
 void print_version(unsigned char *e_ident)
 {
-    printf("  Version:                           ");
-    switch (e_ident[EI_VERSION])
-    {
-    case EV_NONE:
-        printf("0 (invalid)\n");
-        break;
-    case EV_CURRENT:
-        printf("1 (current)\n");
-        break;
-    default:
-        printf("%d (unknown)\n", e_ident[EI_VERSION]);
-        break;
-    }
+    printf("  Version:                           %d\n", e_ident[EI_VERSION]);
 }
 
 void print_osabi(unsigned char *e_ident)
