@@ -88,10 +88,10 @@ void print_data(unsigned char *e_ident)
 void print_version(unsigned char *e_ident)
 {
     printf("  Version:                           ");
-    
+
     if (e_ident[EI_VERSION] == EV_NONE)
         printf("0 (invalid)\n");
-    else if (e_ident[EI_VERSION] == 1)
+    else if (e_ident[EI_VERSION] == EV_CURRENT)
         printf("1 (current)\n");
     else
         printf("%d\n", e_ident[EI_VERSION]);
@@ -159,13 +159,13 @@ void print_abiversion(unsigned char *e_ident)
 void print_type(uint16_t e_type, unsigned char *e_ident)
 {
     printf("  Type:                              ");
-    
+
     /* Handle endianness for e_type */
     if (e_ident[EI_DATA] == ELFDATA2MSB)
     {
         e_type = ((e_type >> 8) & 0x00FF) | ((e_type << 8) & 0xFF00);
     }
-    
+
     switch (e_type)
     {
     case ET_NONE:
@@ -248,26 +248,26 @@ int main(int argc, char **argv)
 
     /* Return to beginning and read full header based on class */
     lseek(fd, 0, SEEK_SET);
-    
+
     if (e_ident[EI_CLASS] == ELFCLASS32)
     {
         Elf32_Ehdr header32;
-        
+
         read_bytes = read(fd, &header32, sizeof(header32));
         if (read_bytes != sizeof(header32))
             print_error("Error: Cannot read ELF header");
-        
+
         e_type = header32.e_type;
         e_entry = header32.e_entry;
     }
     else if (e_ident[EI_CLASS] == ELFCLASS64)
     {
         Elf64_Ehdr header64;
-        
+
         read_bytes = read(fd, &header64, sizeof(header64));
         if (read_bytes != sizeof(header64))
             print_error("Error: Cannot read ELF header");
-        
+
         e_type = header64.e_type;
         e_entry = header64.e_entry;
     }
