@@ -128,9 +128,15 @@ void print_abiversion(unsigned char *e_ident)
     printf("  ABI Version:                       %d\n", e_ident[EI_ABIVERSION]);
 }
 
-void print_type(uint16_t e_type)
+void print_type(uint16_t e_type, unsigned char *e_ident)
 {
     printf("  Type:                              ");
+    
+    if (e_ident[EI_DATA] == ELFDATA2MSB)
+    {
+        e_type = ((e_type >> 8) & 0x00FF) | ((e_type << 8) & 0xFF00);
+    }
+    
     switch (e_type)
     {
     case ET_NONE:
@@ -186,7 +192,6 @@ int main(int argc, char **argv)
     if (fd == -1)
         print_error("Error: Cannot open file");
 
-    /* قراءة Magic bytes أولاً لتحديد Class */
     read_bytes = read(fd, e_ident, EI_NIDENT);
     if (read_bytes != EI_NIDENT)
         print_error("Error: Cannot read ELF identification");
@@ -197,10 +202,8 @@ int main(int argc, char **argv)
         e_ident[EI_MAG3] != ELFMAG3)
         print_error("Error: Not an ELF file");
 
-    /* الرجوع لبداية الملف */
     lseek(fd, 0, SEEK_SET);
-
-    /* قراءة الرأس بناءً على Class */
+    
     if (e_ident[EI_CLASS] == ELFCLASS32)
     {
         Elf32_Ehdr header32;
@@ -235,7 +238,7 @@ int main(int argc, char **argv)
     print_version(e_ident);
     print_osabi(e_ident);
     print_abiversion(e_ident);
-    print_type(e_type);
+    print_type(e_type, e_ident);
     print_entry(e_entry, e_ident);
 
     if (close(fd) == -1)
