@@ -214,37 +214,16 @@ void print_entry(unsigned long int e_entry, unsigned char *e_ident)
 }
 
 /**
- * main - main function
- * @argc: argument count
- * @argv: argument array
- * Return: 0 on success, 98 on error
+ * read_elf_header - reads ELF header based on class
+ * @fd: file descriptor
+ * @e_ident: ELF identification array
+ * @e_type: pointer to store e_type
+ * @e_entry: pointer to store e_entry
  */
-int main(int argc, char **argv)
+void read_elf_header(int fd, unsigned char *e_ident,
+		     uint16_t *e_type, unsigned long int *e_entry)
 {
-	int fd;
 	ssize_t read_bytes;
-	unsigned char e_ident[EI_NIDENT];
-	uint16_t e_type;
-	unsigned long int e_entry;
-
-	if (argc != 2)
-		print_error("Usage: elf_header elf_filename");
-
-	fd = open(argv[1], O_RDONLY);
-	if (fd == -1)
-		print_error("Error: Cannot open file");
-
-	/* Read ELF identification */
-	read_bytes = read(fd, e_ident, EI_NIDENT);
-	if (read_bytes != EI_NIDENT)
-		print_error("Error: Cannot read ELF identification");
-
-	/* Check ELF magic */
-	if (e_ident[EI_MAG0] != ELFMAG0 ||
-		e_ident[EI_MAG1] != ELFMAG1 ||
-		e_ident[EI_MAG2] != ELFMAG2 ||
-		e_ident[EI_MAG3] != ELFMAG3)
-		print_error("Error: Not an ELF file");
 
 	/* Return to beginning and read full header based on class */
 	lseek(fd, 0, SEEK_SET);
@@ -257,8 +236,8 @@ int main(int argc, char **argv)
 		if (read_bytes != sizeof(header32))
 			print_error("Error: Cannot read ELF header");
 
-		e_type = header32.e_type;
-		e_entry = header32.e_entry;
+		*e_type = header32.e_type;
+		*e_entry = header32.e_entry;
 	}
 	else if (e_ident[EI_CLASS] == ELFCLASS64)
 	{
@@ -268,15 +247,46 @@ int main(int argc, char **argv)
 		if (read_bytes != sizeof(header64))
 			print_error("Error: Cannot read ELF header");
 
-		e_type = header64.e_type;
-		e_entry = header64.e_entry;
+		*e_type = header64.e_type;
+		*e_entry = header64.e_entry;
 	}
 	else
 	{
 		print_error("Error: Unknown ELF class");
 	}
+}
 
-	/* Print ELF header information */
+/**
+ * validate_elf_file - validates if file is ELF
+ * @fd: file descriptor
+ * @e_ident: buffer to store ELF identification
+ */
+void validate_elf_file(int fd, unsigned char *e_ident)
+{
+	ssize_t read_bytes;
+
+	/* Read ELF identification */
+	read_bytes = read(fd, e_ident, EI_NIDENT);
+	if (read_bytes != EI_NIDENT)
+		print_error("Error: Cannot read ELF identification");
+
+	/* Check ELF magic */
+	if (e_ident[EI_MAG0] != ELFMAG0 ||
+	    e_ident[EI_MAG1] != ELFMAG1 ||
+	    e_ident[EI_MAG2] != ELFMAG2 ||
+	    e_ident[EI_MAG3] != ELFMAG3)
+		print_error("Error: Not an ELF file");
+}
+
+/**
+ * print_elf_header - prints all ELF header information
+ * @e_ident: ELF identification array
+ * @e_type: ELF type
+ * @e_entry: entry point address
+ */
+void print_elf_header(unsigned char *e_ident,
+		      uint16_t e_type, unsigned long int e_entry)
+{
 	printf("ELF Header:\n");
 	print_magic(e_ident);
 	print_class(e_ident);
@@ -286,6 +296,31 @@ int main(int argc, char **argv)
 	print_abiversion(e_ident);
 	print_type(e_type, e_ident);
 	print_entry(e_entry, e_ident);
+}
+
+/**
+ * main - main function
+ * @argc: argument count
+ * @argv: argument array
+ * Return: 0 on success, 98 on error
+ */
+int main(int argc, char **argv)
+{
+	int fd;
+	unsigned char e_ident[EI_NIDENT];
+	uint16_t e_type;
+	unsigned long int e_entry;
+
+	if (argc != 2)
+		print_error("Usage: elf_header elf_filename");
+
+	fd = open(argv[1], O_RDONLY);
+	if (fd == -1)
+		print_error("Error: Cannot open file");
+
+	validate_elf_file(fd, e_ident);
+	read_elf_header(fd, e_ident, &e_type, &e_entry);
+	print_elf_header(e_ident, e_type, e_entry);
 
 	if (close(fd) == -1)
 		print_error("Error: Cannot close file descriptor");
